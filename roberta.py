@@ -86,6 +86,10 @@ def compute_metrics(pred):
     precision, recall, f1, _ = precision_recall_fscore_support(labels, preds, average='binary')
     acc = accuracy_score(labels, preds)
 
+    # Calculate confusion matrix to get FP and TN
+    tn, fp, fn, tp = confusion_matrix(labels, preds).ravel()
+    fpr = fp / (fp + tn) if (fp + tn) > 0 else 0
+
     # Log the metrics to a file
     with open(log_file, 'a') as log:
         log.write(f"\nEvaluation at {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n")
@@ -93,6 +97,7 @@ def compute_metrics(pred):
         log.write(f"Precision: {precision:.4f}\n")
         log.write(f"Recall: {recall:.4f}\n")
         log.write(f"F1 Score: {f1:.4f}\n")
+        log.write(f"False Positive Rate: {fpr:.4f}\n")
         log.write("-" * 50 + "\n")
 
     return {
@@ -100,6 +105,7 @@ def compute_metrics(pred):
         'precision': precision,
         'recall': recall,
         'f1': f1,
+        'false_positive_rate': fpr,
     }
 
 # Define training arguments
